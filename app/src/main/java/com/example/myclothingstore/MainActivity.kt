@@ -32,12 +32,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.myclothingstore.data.SplashData
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         setContent {
             SplashScreen()
         }
@@ -91,6 +93,7 @@ fun SplashScreen() {
                     Text(
                         text = annotatedString,
                         fontSize = 20.sp,
+                        fontWeight = FontWeight.W600
                     )
                     Text(text = "Skip", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
