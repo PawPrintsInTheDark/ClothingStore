@@ -7,5 +7,5 @@
         <item name="postSplashScreenTheme">@style/Theme.MyClothingStore</item>
     </style>
 
-    <style name="Theme.MyClothingStore" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.MyClothingStore" parent="android:Theme.Material.Light.NoActionBar"/>
 </resources>
