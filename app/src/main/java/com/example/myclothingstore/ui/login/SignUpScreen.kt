@@ -66,7 +66,7 @@ fun SignUpScreen(
         ) {
             passwordState = it
         }
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(30.dp))
         RoundedCornerTextField(
             text = confirmPasswordState,
             label = "ConfirmPassword",
@@ -79,7 +79,7 @@ fun SignUpScreen(
             Text(text = errorState, color = Color.Red)
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(30.dp))
         LoginButton(text = "Sing Up") {
             if (passwordState != confirmPasswordState) {
                 errorState = "Passwords do not match"
