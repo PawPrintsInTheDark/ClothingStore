@@ -22,7 +22,7 @@ fun LoginButton(
         onClick = { onClick() },
         shape = RoundedCornerShape(5.dp),
         modifier = Modifier
-            .fillMaxWidth(0.85f)
+            .fillMaxWidth()
             .size(55.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFFF83758),

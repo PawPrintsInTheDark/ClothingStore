@@ -57,7 +57,7 @@ fun RoundedCornerTextField(
         modifier = Modifier.onFocusChanged { focusState ->
             isFocused = focusState.isFocused
         }
-            .fillMaxWidth(0.85f)
+            .fillMaxWidth()
             .border(1.dp,Color(0xFF626262),RoundedCornerShape(15.dp))
     )
 }

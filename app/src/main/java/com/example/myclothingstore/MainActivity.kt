@@ -6,12 +6,19 @@ import android.view.View
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.example.myclothingstore.ui.login.LoginScreen
-import com.example.myclothingstore.ui.main_screen.bottom_menu.BottomMenu
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.example.myclothingstore.ui.login.SignInScreen
+import com.example.myclothingstore.ui.login.SignUpScreen
+import com.example.myclothingstore.ui.login.data.MainScreenDataObject
+import com.example.myclothingstore.ui.login.data.SignInScreenObject
+import com.example.myclothingstore.ui.login.data.SignUpScreenObject
+import com.example.myclothingstore.ui.main_screen.MainScreen
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -29,13 +36,50 @@ class MainActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         setContent {
-//            Scaffold(
-//                modifier = Modifier.fillMaxSize(),
-//                bottomBar = { BottomMenu() },
-//            ) {
-                LoginScreen()
-//            }
+            val navController = rememberNavController()
+            val auth = Firebase.auth
+            // проверка, надо ли показывать экран регистрации
+            val startDestination = auth.currentUser?.let {
+                MainScreenDataObject(
+                    auth.currentUser!!.uid,
+                    auth.currentUser!!.email!!
+                )
+            } ?: SignInScreenObject
+
+            NavHost(navController = navController, startDestination = startDestination) {
+                composable<SignInScreenObject> {
+                    SignInScreen(
+                        onNavigateToMainScreen = { navData ->
+                            navController.navigate(navData)
+                        },
+                        onNavigateToSignUpScreen = {
+                            navController.navigate(SignUpScreenObject)
+                        })
+                }
+                composable<SignUpScreenObject> {
+                    SignUpScreen(
+                        onNavigateToMainScreen = { navData ->
+                            navController.navigate(navData)
+                        },
+                        onNavigateToLoginScreen = {
+                            navController.navigate(SignInScreenObject)
+                        }
+                    )
+                }
+                composable<MainScreenDataObject> { navEntry ->
+                    val navData = navEntry.toRoute<MainScreenDataObject>()
+                    MainScreen(navData) {
+                        navController.navigate(SignInScreenObject)
+                    }
+                }
+
+            }
         }
     }
 }
 
+// Scaffold(
+////                modifier = Modifier.fillMaxSize(),
+////                bottomBar = { BottomMenu() },
+////            ) {
+////            }
