@@ -7,27 +7,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myclothingstore.R
 import com.example.myclothingstore.ui.login.data.MainScreenDataObject
+import com.example.myclothingstore.ui.login.state.LoginScreenEvent
+import com.example.myclothingstore.ui.login.state.LoginScreenState
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -36,19 +30,32 @@ import com.google.firebase.auth.auth
 fun SignInScreen(
     onNavigateToMainScreen: (MainScreenDataObject) -> Unit = {},
     onNavigateToSignUpScreen: () -> Unit = {},
-    onNavigateToForgotPasswordScreen: () -> Unit = {}
+    onNavigateToForgotPasswordScreen: () -> Unit = {},
 ) {
+    val viewModel = viewModel<SignInViewModel>()
+    SignInView(
+        onNavigateToMainScreen,
+        onNavigateToSignUpScreen,
+        onNavigateToForgotPasswordScreen,
+        state = viewModel.state,
+        onEvent = viewModel::onEvent
+    )
+}
 
 
+@Composable
+fun SignInView(
+    onNavigateToMainScreen: (MainScreenDataObject) -> Unit = {},
+    onNavigateToSignUpScreen: () -> Unit = {},
+    onNavigateToForgotPasswordScreen: () -> Unit = {},
+    state: LoginScreenState = LoginScreenState(),
+    onEvent: (LoginScreenEvent) -> Unit = {}
+) {
     val auth = remember { Firebase.auth }
-    var emailState by remember { mutableStateOf("") }
-    var passwordState by remember { mutableStateOf("") }
-    var errorState by remember { mutableStateOf("") }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal =  32.dp, vertical = 80.dp),
+            .padding(horizontal = 32.dp, vertical = 80.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
@@ -56,25 +63,25 @@ fun SignInScreen(
         Text(text = "Welcome Back!", fontSize = 58.sp, fontWeight = FontWeight.W800)
         Spacer(modifier = Modifier.height(30.dp))
         RoundedCornerTextField(
-            text = emailState,
+            text = state.email,
             label = "Username or Email",
             R.drawable.ic_email
         ) {
-            emailState = it
+            onEvent(LoginScreenEvent.EmailChanged(it))
         }
 
         Spacer(modifier = Modifier.height(30.dp))
 
         RoundedCornerTextField(
-            text = passwordState,
+            text = state.password,
             label = "Password",
             R.drawable.ic_password_lock
         ) {
-            passwordState = it
+            onEvent(LoginScreenEvent.PasswordChanged(it))
         }
-        if (errorState.isNotEmpty()) {
+        if (state.error.isNotEmpty()) {
             Spacer(modifier = Modifier.height(30.dp))
-            Text(text = errorState, color = Color.Red)
+            Text(text = state.error, color = Color.Red)
         }
 
         TextButton(
@@ -88,15 +95,15 @@ fun SignInScreen(
         LoginButton(text = "Login") {
             signIn(
                 auth,
-                emailState,
-                passwordState,
+                state.email,
+                state.password,
                 onSignUpSuccess = { navData ->
                     onNavigateToMainScreen(navData)
-                    errorState = ""
+                    onEvent(LoginScreenEvent.EmailChanged(""))
                 },
                 onSignUpFailure = { error ->
                     Log.d("MyLog", "Sing In Failure: $error")
-                    errorState = error
+                    onEvent(LoginScreenEvent.EmailChanged(error))
                 },
             )
         }

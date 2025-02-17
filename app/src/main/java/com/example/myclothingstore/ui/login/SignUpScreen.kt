@@ -17,11 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myclothingstore.R
 import com.example.myclothingstore.ui.login.data.MainScreenDataObject
+import com.example.myclothingstore.ui.login.state.LoginScreenEvent
+import com.example.myclothingstore.ui.login.state.LoginScreenState
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -29,16 +31,25 @@ import com.google.firebase.auth.auth
 @Composable
 fun SignUpScreen(
     onNavigateToMainScreen: (MainScreenDataObject) -> Unit = {},
-    onNavigateToLoginScreen: () -> Unit = {}
+    onNavigateToLoginScreen: () -> Unit = {},
 ) {
+    val viewModel = viewModel<SignInViewModel>()
+    SignUpView(
+        onNavigateToMainScreen,
+        onNavigateToLoginScreen,
+        state = viewModel.state,
+        onEvent = viewModel::onEvent
+    )
+}
 
-
+@Composable
+fun SignUpView(
+    onNavigateToMainScreen: (MainScreenDataObject) -> Unit = {},
+    onNavigateToLoginScreen: () -> Unit = {},
+    state: LoginScreenState = LoginScreenState(),
+    onEvent: (LoginScreenEvent) -> Unit = {}
+) {
     val auth = remember { Firebase.auth }
-    var emailState by remember { mutableStateOf("") }
-    var passwordState by remember { mutableStateOf("") }
-    var confirmPasswordState by remember { mutableStateOf("") }
-    var errorState by remember { mutableStateOf("") }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -50,52 +61,52 @@ fun SignUpScreen(
         Text(text = "Create an account", fontSize = 58.sp, fontWeight = FontWeight.W800)
         Spacer(modifier = Modifier.height(30.dp))
         RoundedCornerTextField(
-            text = emailState,
+            text = state.email,
             label = "Username or Email",
             R.drawable.ic_email
         ) {
-            emailState = it
+            onEvent(LoginScreenEvent.EmailChanged(it))
         }
 
         Spacer(modifier = Modifier.height(30.dp))
 
         RoundedCornerTextField(
-            text = passwordState,
+            text = state.password,
             label = "Password",
             R.drawable.ic_password_lock
         ) {
-            passwordState = it
+            onEvent(LoginScreenEvent.PasswordChanged(it))
         }
         Spacer(modifier = Modifier.height(30.dp))
         RoundedCornerTextField(
-            text = confirmPasswordState,
+            text = state.confirmPassword,
             label = "ConfirmPassword",
             R.drawable.ic_password_lock
         ) {
-            confirmPasswordState = it
+            onEvent(LoginScreenEvent.ConfirmPasswordChanged(it))
         }
-        if (errorState.isNotEmpty()) {
+        if (state.error.isNotEmpty()) {
             Spacer(modifier = Modifier.height(30.dp))
-            Text(text = errorState, color = Color.Red)
+            Text(text = state.error, color = Color.Red)
         }
 
         Spacer(modifier = Modifier.height(30.dp))
         LoginButton(text = "Sing Up") {
-            if (passwordState != confirmPasswordState) {
-                errorState = "Passwords do not match"
+            if (state.password != state.confirmPassword) {
+                onEvent(LoginScreenEvent.EmailChanged("Passwords do not match"))
                 return@LoginButton
             }
             signUp(
                 auth,
-                emailState,
-                passwordState,
+                state.email,
+                state.password,
                 onSignUpSuccess = { navData ->
                     onNavigateToMainScreen(navData)
-                    errorState = ""
+                    onEvent(LoginScreenEvent.EmailChanged(""))
                 },
                 onSignUpFailure = { error ->
                     Log.d("MyLog", "Sing Up Failure: $error")
-                    errorState = error
+                    onEvent(LoginScreenEvent.EmailChanged(error))
                 }
             )
         }

@@ -2,10 +2,10 @@ package com.example.myclothingstore
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.View
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.remember
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,19 +26,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
 
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-        )
-
-
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
-            val auth = Firebase.auth
-            // проверка, надо ли показывать экран регистрации
+            val auth = remember { Firebase.auth }
             val startDestination = auth.currentUser?.let {
                 MainScreenDataObject(
                     auth.currentUser!!.uid,
@@ -49,17 +40,18 @@ class MainActivity : ComponentActivity() {
             NavHost(navController = navController, startDestination = startDestination) {
                 composable<SignInScreenObject> {
                     SignInScreen(
-                        onNavigateToMainScreen = { navData ->
-                            navController.navigate(navData)
-                        },
                         onNavigateToSignUpScreen = {
                             navController.navigate(SignUpScreenObject)
-                        })
+                        },
+                        onNavigateToMainScreen = { navigateTo ->
+                            navController.navigate(navigateTo)
+                        }
+                    )
                 }
                 composable<SignUpScreenObject> {
                     SignUpScreen(
-                        onNavigateToMainScreen = { navData ->
-                            navController.navigate(navData)
+                        onNavigateToMainScreen = { navigateTo ->
+                            navController.navigate(navigateTo)
                         },
                         onNavigateToLoginScreen = {
                             navController.navigate(SignInScreenObject)
@@ -77,9 +69,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-// Scaffold(
-////                modifier = Modifier.fillMaxSize(),
-////                bottomBar = { BottomMenu() },
-////            ) {
-////            }
