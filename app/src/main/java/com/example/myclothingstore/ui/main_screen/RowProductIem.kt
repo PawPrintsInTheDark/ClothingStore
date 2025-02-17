@@ -21,7 +21,7 @@ import coil3.compose.AsyncImage
 import com.example.myclothingstore.R
 
 @Composable
-fun RowProductIem() {
+fun RowProductIem(data: RowItem) {
     Column(
         modifier = Modifier
             .width(200.dp)
@@ -30,7 +30,7 @@ fun RowProductIem() {
         horizontalAlignment = Alignment.Start,
     ) {
         AsyncImage(
-            model = R.drawable.test_row_image,
+            model = data.img,
             contentDescription = "",
             alignment = Alignment.TopStart,
             modifier = Modifier
@@ -41,14 +41,14 @@ fun RowProductIem() {
                 ),
             contentScale = ContentScale.Crop
         )
-        Text(text = "Women Printed Kurta", fontSize = 16.sp, modifier = Modifier.padding(5.dp))
+        Text(text = data.title, fontSize = 16.sp, modifier = Modifier.padding(5.dp))
         Text(
-            text = "Neque porro quisquam est qui dolorem ipsum quia",
+            text = data.description,
             fontSize = 16.sp,
             modifier = Modifier.padding(5.dp)
         )
         Text(
-            text = "₹1500",
+            text = "₹${data.price}",
             fontSize = 16.sp,
             modifier = Modifier.padding(5.dp),
             fontWeight = FontWeight.Bold
